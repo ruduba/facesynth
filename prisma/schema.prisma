@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ... rest of your schema stays the same
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  passwordHash  String
+  name          String?
+  createdAt     DateTime    @default(now())
+  tutorialSeen  Boolean     @default(false)
+  
+  meshes        Mesh[]
+  folders       Folder[]
+  printers      Printer[]
+  printJobs     PrintJob[]
+
+  @@index([email])
+}
+
+model Mesh {
+  id                String    @id @default(cuid())
+  userId            String
+  name              String
+  description       String?
+  filePath          String    // S3 key or local path
+  thumbnailPath     String?
+  jsonMetadata      String    @db.Text  // JSON string with controls, masks
+  baselinePositions String?   @db.Text  // Compressed baseline data
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  folderId          String?
+  isPreset          Boolean   @default(false)
+  versionParentId   String?
+  
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder            Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  versionParent     Mesh?     @relation("MeshVersions", fields: [versionParentId], references: [id], onDelete: SetNull)
+  versions          Mesh[]    @relation("MeshVersions")
+  printJobs         PrintJob[]
+
+  @@index([userId, createdAt])
+  @@index([folderId])
+  @@index([isPreset])
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meshes    Mesh[]
+
+  @@index([userId])
+}
+
+model Printer {
+  id        String      @id @default(cuid())
+  userId    String
+  name      String
+  baseUrl   String
+  apiKey    String      // Encrypted
+  lastSeen  DateTime?
+  enabled   Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  printJobs PrintJob[]
+
+  @@index([userId])
+}
+
+model PrintJob {
+  id          String    @id @default(cuid())
+  userId      String
+  meshId      String
+  printerId   String
+  status      String    // pending, printing, completed, failed, cancelled
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  options     String?   @db.Text  // JSON string with print settings
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mesh        Mesh      @relation(fields: [meshId], references: [id], onDelete: Cascade)
+  printer     Printer   @relation(fields: [printerId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+  @@index([status])
+}
