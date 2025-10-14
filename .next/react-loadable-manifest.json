@@ -64,23 +64,5 @@
     "files": [
       "static/chunks/lib_stlExport_js.js"
     ]
-  },
-  "pages/view/[meshId].jsx -> ../../lib/facemesh-triangles": {
-    "id": "pages/view/[meshId].jsx -> ../../lib/facemesh-triangles",
-    "files": [
-      "static/chunks/lib_facemesh-triangles_js.js"
-    ]
-  },
-  "pages/view/[meshId].jsx -> three": {
-    "id": "pages/view/[meshId].jsx -> three",
-    "files": [
-      "static/chunks/node_modules_three_build_three_module_js.js"
-    ]
-  },
-  "pages/view/[meshId].jsx -> three/examples/jsm/controls/OrbitControls": {
-    "id": "pages/view/[meshId].jsx -> three/examples/jsm/controls/OrbitControls",
-    "files": [
-      "static/chunks/node_modules_three_examples_jsm_controls_OrbitControls_js.js"
-    ]
   }
 }

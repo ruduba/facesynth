@@ -1,13 +1,6 @@
 {
+  "/_document": "pages/_document.js",
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/api/meshes/[id]": "pages/api/meshes/[id].js",
-  "/view/[meshId]": "pages/view/[meshId].js",
-  "/library": "pages/library.js",
-  "/api/meshes": "pages/api/meshes.js",
-  "/api/library/folders": "pages/api/library/folders.js",
-  "/editor/[meshId]": "pages/editor/[meshId].js",
-  "/": "pages/index.js",
-  "/api/user/me": "pages/api/user/me.js"
+  "/editor/[meshId]": "pages/editor/[meshId].js"
 }

@@ -42,7 +42,7 @@ export default function ThreeDViewer({
       const height = containerRef.current.clientHeight;
 
       const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      camera.position.set(0, 0, 3);
+      camera.position.set(3, 3, 3);
       cameraRef.current = camera;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -158,107 +158,145 @@ scene.add(rimLight);
     };
   }, []);
 
-  // === BUILD / UPDATE MESH ===
-  useEffect(() => {
-    let cancelled = false;
+// === BUILD / UPDATE MESH ===
+useEffect(() => {
+  let cancelled = false;
 
-async function buildMeshFromPositions(positionsArray) {
-  const THREE = await import('three');
-  const triModule = await import('../../lib/facemesh-triangles');
-  const { MeshDeformer } = await import('../../lib/mesh-utils');
+  async function buildMeshFromPositions(positionsArray) {
+    const THREE = await import('three');
+    const triModule = await import('../../lib/facemesh-triangles');
+    const { MeshDeformer } = await import('../../lib/mesh-utils');
 
-  const FACEMESH_TRIANGLES =
-    triModule.FACEMESH_TRIANGLES ||
-    triModule.default;
+    const FACEMESH_TRIANGLES =
+      triModule.FACEMESH_TRIANGLES || triModule.default;
+    if (!FACEMESH_TRIANGLES) {
+      throw new Error('FACEMESH_TRIANGLES missing — check facemesh-triangles.js');
+    }
 
-  if (!FACEMESH_TRIANGLES) {
-    throw new Error('FACEMESH_TRIANGLES missing — check your facemesh-triangles.js export.');
-  }
+    const scene = sceneRef.current;
+    if (!scene || !rendererRef.current) return;
 
-  const scene = sceneRef.current;
-  if (!scene || !rendererRef.current) return;
-
-  // Clean up previous mesh
-  if (meshRef.current) {
-    try {
-      meshRef.current.geometry.dispose();
-      meshRef.current.material.dispose();
-      scene.remove(meshRef.current);
-    } catch {}
-  }
-
-  // === Create geometry ===
-  const positions = new Float32Array(positionsArray);
-  const indices = new Uint16Array(FACEMESH_TRIANGLES.flat());
-  const geom = new THREE.BufferGeometry();
-  geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geom.setIndex(new THREE.BufferAttribute(indices, 1));
-
-  geom.computeVertexNormals();
-  geom.computeBoundingBox();
-  geom.center();
-
-  console.log('FACEMESH_TRIANGLES', FACEMESH_TRIANGLES.length);
-  console.log('✅ Face mesh created, vertices:', geom.attributes.position.count);
-
-  const bbox = geom.boundingBox;
-  const size = new THREE.Vector3();
-  bbox.getSize(size);
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = 20 / maxDim;
-
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0xffc0cb,
-    side: THREE.DoubleSide,
-    wireframe: showWireframe,
-  });
-
-  const mesh = new THREE.Mesh(geom, mat);
-  mesh.scale.setScalar(scale);
-  scene.add(mesh);
-  meshRef.current = mesh;
-
-  // Adjust camera distance
-  const camera = cameraRef.current;
-  if (camera) {
-    const dist = Math.max(1.5 * maxDim * scale, 3);
-    camera.position.set(0, 0, dist);
-    camera.near = dist / 100;
-    camera.far = dist * 10;
-    camera.updateProjectionMatrix();
-  }
-
-  // Create deformer
-  deformerRef.current = new MeshDeformer(positions);
-}
-
-
-    (async () => {
+    // Clean old mesh
+    if (meshRef.current) {
       try {
-        if (baselinePositions && baselinePositions.length >= 3) {
-          await buildMeshFromPositions(baselinePositions);
-        } else if (!canonicalLoadedRef.current) {
-          canonicalLoadedRef.current = true;
-          const res = await fetch('/assets/canonicalFaceMesh.json');
-          if (res.ok) {
-            const data = await res.json();
-            const verts = Array.isArray(data.vertices)
-              ? data.vertices.flat()
-              : data.flat?.() || data;
-            await buildMeshFromPositions(verts);
-          } else {
-            console.warn('No canonical face mesh found.');
-          }
-        }
-      } catch (err) {
-        console.error('Mesh build failed:', err);
-      }
-    })();
+        meshRef.current.geometry.dispose();
+        meshRef.current.material.dispose();
+        scene.remove(meshRef.current);
+      } catch {}
+    }
 
-    return () => {
-      cancelled = true;
-    };
-  }, [baselinePositions, showWireframe]);
+    // === Build geometry ===
+    const positions = new Float32Array(positionsArray);
+    const indices = new Uint16Array(FACEMESH_TRIANGLES.flat());
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geom.setIndex(new THREE.BufferAttribute(indices, 1));
+    geom.computeVertexNormals();
+    geom.computeBoundingBox();
+    geom.center();
+
+    console.log('✅ Face mesh created, vertices:', geom.attributes.position.count);
+
+    const bbox = geom.boundingBox;
+    const size = new THREE.Vector3();
+    bbox.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 20 / maxDim;
+
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0xffc0cb,
+      side: THREE.DoubleSide,
+      wireframe: showWireframe,
+      flatShading: false, // <-- enables smooth shading
+    });
+
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.scale.setScalar(scale);
+    scene.add(mesh);
+    meshRef.current = mesh;
+
+    // Center camera properly
+    const camera = cameraRef.current;
+    if (camera) {
+      const dist = Math.max(1.5 * maxDim * scale, 3);
+      camera.position.set(0, 0, dist);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+    }
+
+    // Initialize deformer
+    deformerRef.current = new MeshDeformer(positions);
+    console.log('🧩 Deformer initialized with', positions.length, 'vertices');
+
+  }
+
+  // build either baseline or canonical mesh
+  (async () => {
+    try {
+      if (baselinePositions && baselinePositions.length >= 3) {
+        await buildMeshFromPositions(baselinePositions);
+      } else if (!canonicalLoadedRef.current) {
+        canonicalLoadedRef.current = true;
+        const res = await fetch('/assets/canonicalFaceMesh.json');
+        if (res.ok) {
+          const data = await res.json();
+          const verts = Array.isArray(data.vertices)
+            ? data.vertices.flat()
+            : data.flat?.() || data;
+          await buildMeshFromPositions(verts);
+        } else {
+          console.warn('⚠️ No canonical face mesh found.');
+        }
+      }
+    } catch (err) {
+      console.error('Mesh build failed:', err);
+    }
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [baselinePositions, showWireframe]);
+
+
+// === APPLY CONTROLS TO MESH ===
+useEffect(() => {
+  console.log('📦 Baseline:', baselinePositions?.length);
+  if (!deformerRef.current || !controls || !meshRef.current) return;
+
+  const mesh = meshRef.current;
+  const geom = mesh.geometry;
+
+  console.log('⚙️ Controls changed:', controls); // add this
+  if (!geom || !geom.attributes?.position) {
+    console.warn('⚠️ Geometry or position attribute missing');
+    return;
+  }
+
+  const newPositions = Float32Array.from(deformerRef.current.applyControls(controls) || []);
+
+  console.log('📈 New positions:', newPositions?.slice(0, 12)); // log first few
+  if (!newPositions || !newPositions.length) {
+    console.warn('⚠️ applyControls returned invalid positions');
+    return;
+  }
+
+  // Replace vertex data safely
+  geom.attributes.position.array.set(newPositions);
+  geom.attributes.position.needsUpdate = true;
+  geom.computeVertexNormals();
+
+  if (onPositionUpdate) {
+  onPositionUpdate(new Float32Array(newPositions));
+}
+  geom.computeBoundingSphere();
+  geom.computeVertexNormals();
+  meshRef.current.geometry = geom; // force refresh
+  console.log(newPositions.slice(450,480))
+
+}, [controls]);
+
+
 
 
       useEffect(() => {
@@ -270,7 +308,7 @@ async function buildMeshFromPositions(positionsArray) {
 }, [baselinePositions]);
 
   return (
-    <div className="threed-viewer" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="threed-viewer" style={{ height: '100%', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <div
         className="viewer-toolbar"
         style={{
@@ -289,7 +327,17 @@ async function buildMeshFromPositions(positionsArray) {
           {meshRef.current ? '3D Mesh' : 'Loading...'}
         </span>
       </div>
-      <div ref={containerRef} className="canvas-container" style={{ flex: 1, background: '#1a1a1a' }} />
+      <div
+  ref={containerRef}
+  className="canvas-container"
+  style={{
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    minHeight: 0,
+    background: '#1a1a1a'
+  }}
+/>
     </div>
   );
 }

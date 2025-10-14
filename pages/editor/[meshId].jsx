@@ -19,6 +19,9 @@ export default function Editor() {
   const [mesh, setMesh] = useState(null);
   const [positions, setPositions] = useState(null);
   const [baselinePositions, setBaselinePositions] = useState(null);
+
+
+
   const [controls, setControls] = useState({
     jawWidth: 1.0,
     chinHeight: 1.0,
@@ -29,32 +32,46 @@ export default function Editor() {
     cheekPuff: 1.0,
     faceScale: 1.0
   });
+  const [history, setHistory] = useState([]);
+  const [future, setFuture] = useState([]);
+
   const [showCamera, setShowCamera] = useState(true);
   const [selectedTool, setSelectedTool] = useState('move');
   const [showExportModal, setShowExportModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [undoStack, setUndoStack] = useState([]);
+const [undoStack, setUndoStack] = useState([]);
 const [redoStack, setRedoStack] = useState([]);
 
+// when a slider changes
+function handleControlChange(name, value) {
+  setUndoStack(prev => [...prev, { ...controls }].slice(-50)); // keep last 50 states
+  setRedoStack([]); // clear redo stack on new action
+  setControls(prev => ({ ...prev, [name]: value }));
+}
 
-const handleUndo = () => {
-  if (undoStack.length === 0) return;
-  
-  const previousState = undoStack[undoStack.length - 1];
-  setRedoStack(prev => [...prev, { ...controls }]);
-  setUndoStack(prev => prev.slice(0, -1));
-  setControls(previousState);
-};
+// undo
+function handleUndo() {
+  setUndoStack(prev => {
+    if (prev.length === 0) return prev;
+    const last = prev[prev.length - 1];
+    setRedoStack(r => [controls, ...r]);
+    setControls(last);
+    return prev.slice(0, -1);
+  });
+}
 
-const handleRedo = () => {
-  if (redoStack.length === 0) return;
-  
-  const nextState = redoStack[redoStack.length - 1];
-  setUndoStack(prev => [...prev, { ...controls }]);
-  setRedoStack(prev => prev.slice(0, -1));
-  setControls(nextState);
-};
+// redo
+function handleRedo() {
+  setRedoStack(prev => {
+    if (prev.length === 0) return prev;
+    const next = prev[0];
+    setUndoStack(u => [...u, controls]);
+    setControls(next);
+    return prev.slice(1);
+  });
+}
+
 
   useEffect(() => {
     if (meshId && meshId !== 'new') {
@@ -83,16 +100,6 @@ const handleRedo = () => {
     }
   };
 
-  const handleControlChange = (name, value) => {
-  // Save current state to undo stack
-  setUndoStack(prev => [...prev, { ...controls }].slice(-50)); // Keep last 50
-  setRedoStack([]); // Clear redo when new action
-  
-  setControls(prev => ({
-    ...prev,
-    [name]: value
-  }));
-};
 
   const handleBaselineCapture = (capturedPositions) => {
     setBaselinePositions(capturedPositions);
@@ -225,20 +232,29 @@ const handleRedo = () => {
         </div>
 
         <div className="editor-center">
-          <ThreeDViewer 
-            positions={positions}
-            controls={controls}
-            baselinePositions={baselinePositions}
-            onPositionUpdate={handlePositionUpdate}
-            selectedTool={selectedTool}
-          />
-          <UndoRedo />
-        </div>
+
+  <ThreeDViewer 
+    positions={positions}
+    controls={controls}
+    baselinePositions={baselinePositions}
+    onPositionUpdate={handlePositionUpdate}
+    selectedTool={selectedTool}
+  />
+  <UndoRedo 
+    onUndo={handleUndo}
+    onRedo={handleRedo}
+    canUndo={history.length > 0}
+    canRedo={future.length > 0}
+  />
+</div>
+
+
+        
 
         <div className="editor-right">
           <Controls 
             controls={controls}
-            onChange={handleControlChange}
+            onChange={(name, value) => handleControlChange(name, value)}
             disabled={!baselinePositions}
           />
         </div>
@@ -269,6 +285,14 @@ const handleRedo = () => {
           color: white;
           border-bottom: 2px solid var(--border-dark);
         }
+        .editor-center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  overflow: hidden; /* ensures canvas doesn’t scroll */
+}
 
         .editor-title {
           display: flex;
