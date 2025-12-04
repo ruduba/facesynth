@@ -86,7 +86,7 @@ export default function Dashboard() {
             className="dashboard-card card-create"
             onClick={() => router.push('/editor/new')}
           >
-            <div className="card-icon">✨</div>
+            <div className="card-icon"></div>
             <h3>Create New Mesh</h3>
             <p>Start from scratch or capture from camera</p>
             <button className="btn-primary">Get Started</button>
@@ -96,7 +96,7 @@ export default function Dashboard() {
             className="dashboard-card card-library"
             onClick={() => router.push('/library')}
           >
-            <div className="card-icon">📁</div>
+            <div className="card-icon"></div>
             <h3>My Mesh Library</h3>
             <p>Browse and manage your saved meshes</p>
             <button className="btn-primary">View Library</button>
@@ -106,7 +106,7 @@ export default function Dashboard() {
             className="dashboard-card card-presets"
             onClick={() => router.push('/presets')}
           >
-            <div className="card-icon">🎭</div>
+            <div className="card-icon"></div>
             <h3>Check Out Presets</h3>
             <p>Explore fun predefined face meshes</p>
             <button className="btn-primary">Browse Presets</button>

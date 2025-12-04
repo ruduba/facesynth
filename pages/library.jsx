@@ -107,7 +107,7 @@ export default function Library() {
               className={`folder-item ${!selectedFolder ? 'active' : ''}`}
               onClick={() => setSelectedFolder(null)}
             >
-              📁 All Meshes
+               All Meshes
             </button>
             {folders.map(folder => (
               <button
@@ -115,7 +115,7 @@ export default function Library() {
                 className={`folder-item ${selectedFolder === folder.id ? 'active' : ''}`}
                 onClick={() => setSelectedFolder(folder.id)}
               >
-                📁 {folder.name}
+                 {folder.name}
               </button>
             ))}
           </div>
@@ -129,7 +129,7 @@ export default function Library() {
             </div>
           ) : meshes.length === 0 ? (
             <div className="empty-state">
-              <p className="empty-icon">📦</p>
+              <p className="empty-icon"></p>
               <p>No meshes found</p>
               <button 
                 className="btn-primary"
@@ -207,7 +207,7 @@ export default function Library() {
       </div>
 
       <style jsx>{`
-        .library-container {
+       .library-container {
           min-height: 100vh;
           display: flex;
           flex-direction: column;

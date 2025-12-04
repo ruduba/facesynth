@@ -2,13 +2,13 @@
 
 export default function Controls({ controls, onChange, disabled }) {
   const controlGroups = [
-    {
+    /*{
       title: 'Jaw & Chin',
       controls: [
         { name: 'jawWidth', label: 'Jaw Width', min: 0.6, max: 1.6, step: 0.05 },
         { name: 'chinHeight', label: 'Chin Height', min: 0.6, max: 1.8, step: 0.05 }
       ]
-    },
+    },*/
     {
       title: 'Mouth',
       controls: [
@@ -34,12 +34,13 @@ export default function Controls({ controls, onChange, disabled }) {
         { name: 'cheekPuff', label: 'Cheek Puff', min: 0.6, max: 1.6, step: 0.05 }
       ]
     },
+    /*
     {
       title: 'Overall',
       controls: [
         { name: 'faceScale', label: 'Face Scale', min: 0.7, max: 1.5, step: 0.05 }
       ]
-    }
+    }*/
   ];
 
   const handleSliderChange = (name, value) => {

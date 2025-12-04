@@ -1,3 +1,5 @@
+//FaceMeshViewer.jsx
+
 import { useEffect, useRef, useState } from 'react';
 
 export default function FaceMeshViewer({ onBaselineCapture, baselinePositions }) {
@@ -63,7 +65,6 @@ export default function FaceMeshViewer({ onBaselineCapture, baselinePositions })
 
       if (results.multiFaceLandmarks && results.multiFaceLandmarks[0]) {
         const landmarks = results.multiFaceLandmarks[0];
-        
         // Draw landmarks
         ctx.fillStyle = '#00ff00';
         for (const landmark of landmarks) {
@@ -134,29 +135,90 @@ export default function FaceMeshViewer({ onBaselineCapture, baselinePositions })
     }
   };
 
-  const captureBaseline = () => {
-    const results = latestResultsRef.current;
-    
-    if (!results || !results.multiFaceLandmarks || !results.multiFaceLandmarks[0]) {
-      alert('No face detected. Please ensure your face is visible in the camera.');
-      return;
-    }
+const captureBaseline = () => {
+  const results = latestResultsRef.current;
+  
+  if (!results || !results.multiFaceLandmarks || !results.multiFaceLandmarks[0]) {
+    alert('No face detected. Please ensure your face is visible in the camera.');
+    return;
+  }
 
-    const landmarks = results.multiFaceLandmarks[0];
-    const positions = new Float32Array(468 * 3);
+  const landmarks = results.multiFaceLandmarks[0];
+  
+  // Calculate MediaPipe ranges
+  const xVals = landmarks.map(l => l.x);
+  const yVals = landmarks.map(l => l.y);
+  const zVals = landmarks.map(l => l.z);
+  
+  const xMin = Math.min(...xVals);
+  const xMax = Math.max(...xVals);
+  const yMin = Math.min(...yVals);
+  const yMax = Math.max(...yVals);
+  const zMin = Math.min(...zVals);
+  const zMax = Math.max(...zVals);
+  
+  const xSpan = xMax - xMin;
+  const ySpan = yMax - yMin;
+  const zSpan = zMax - zMin;
+  
+  // Target aspect ratios from canonical mesh
+  const targetAspectXY = 0.877; // Canonical X/Y ratio
+  const targetAspectZY = 0.567; // Canonical Z/Y ratio
+  
+  // Calculate scale factors to match canonical proportions
+  const scaleX = targetAspectXY / (xSpan / ySpan);
+  const scaleZ = targetAspectZY / (zSpan / ySpan);
+  
+  console.log('Scale factors - X:', scaleX.toFixed(3), 'Z:', scaleZ.toFixed(3));
+  
+  const positions = new Float32Array(468 * 3);
+  
+  // Convert with aspect ratio correction
+  for (let i = 0; i < landmarks.length; i++) {
+    const landmark = landmarks[i];
     
-    // Convert normalized coordinates to 3D positions
-    for (let i = 0; i < landmarks.length; i++) {
-      const landmark = landmarks[i];
-      // Center and scale the face
-      positions[i * 3] = (landmark.x - 0.5) * 2;      // X: -1 to 1
-      positions[i * 3 + 1] = (0.5 - landmark.y) * 2;  // Y: -1 to 1 (flip)
-      positions[i * 3 + 2] = landmark.z * 2;          // Z: scaled depth
-    }
+    // Normalize to 0-centered, then scale to match canonical proportions
+    const xNorm = (landmark.x - (xMin + xMax) / 2) / xSpan;
+    const yNorm = (landmark.y - (yMin + yMax) / 2) / ySpan;
+    const zNorm = (landmark.z - (zMin + zMax) / 2) / zSpan;
+    
+    // Apply aspect ratio correction and scale to canonical range
+    positions[i * 3] = xNorm * scaleX * xSpan * 2;           // X
+    positions[i * 3 + 1] = -yNorm * ySpan * 2;               // Y (flip)
+    positions[i * 3 + 2] = zNorm * scaleZ * zSpan * 2;       // Z
+  }
+  
+  console.log('✅ Captured with corrected aspect ratios');
+  
+  onBaselineCapture(positions);
+  alert('Baseline captured! Your face proportions have been matched to the canonical mesh.');
+};
 
-    onBaselineCapture(positions);
-    alert('Baseline captured! You can now edit the mesh with the controls.');
-  };
+// Add this as a useEffect in your component or run in console
+useEffect(() => {
+  fetch('/assets/canonicalFaceMesh.json')
+    .then(r => r.json())
+    .then(data => {
+      const canonical = data.vertices.flat();
+      console.log('=== CANONICAL MESH ===');
+      console.log('Total values:', canonical.length);
+      
+      const canX = canonical.filter((_, i) => i % 3 === 0);
+      const canY = canonical.filter((_, i) => i % 3 === 1);
+      const canZ = canonical.filter((_, i) => i % 3 === 2);
+      
+      console.log('Canonical X range:', Math.min(...canX).toFixed(3), 'to', Math.max(...canX).toFixed(3));
+      console.log('Canonical Y range:', Math.min(...canY).toFixed(3), 'to', Math.max(...canY).toFixed(3));
+      console.log('Canonical Z range:', Math.min(...canZ).toFixed(3), 'to', Math.max(...canZ).toFixed(3));
+      
+      const canXspan = Math.max(...canX) - Math.min(...canX);
+      const canYspan = Math.max(...canY) - Math.min(...canY);
+      const canZspan = Math.max(...canZ) - Math.min(...canZ);
+      
+      console.log('Canonical aspect X/Y:', (canXspan / canYspan).toFixed(3));
+      console.log('Canonical aspect Z/Y:', (canZspan / canYspan).toFixed(3));
+    });
+}, []);
 
   return (
     <div className="facemesh-viewer">

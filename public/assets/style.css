@@ -1,4 +1,499 @@
-/* FaceSynth.exe - Y2K Windows 2000s Aesthetic */
+/*
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+  --primary-blue: rgb(4, 255, 0);
+  --primary-hover: rgb(3, 200, 0);
+  --secondary-gray: rgb(6, 0, 19);
+  --border-light: rgb(200, 200, 200, 0.2);
+  --border-dark: rgb(8, 0, 60);
+  --shadow-dark: #000000;
+  --bg-window: black;
+  --text-primary: white;
+  --text-secondary: aqua;
+  --error-red: red;
+  --success-green: rgb(4, 255, 0);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "VT323", monospace;
+  font-weight: 400;
+  font-style: normal;
+  background: black;
+  color: aqua;
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+
+button, .btn {
+  font-family: "VT323", monospace;
+  font-size: 1.7rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: 2px solid rgb(4, 255, 0);
+  background: black;
+  color: rgb(4, 255, 0);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+button:active, .btn:active {
+  background-color: rgb(4, 255, 0);
+  color: black;
+}
+
+button:hover, .btn:hover {
+  background-color: rgb(4, 255, 0);
+  color: black;
+}
+
+.btn-primary {
+  background: black;
+  color: rgb(4, 255, 0);
+  border: 2px solid rgb(4, 255, 0);
+  font-weight: bold;
+  padding: 10px 20px;
+}
+
+.btn-primary:hover {
+  background: rgb(4, 255, 0);
+  color: black;
+}
+
+.btn-secondary {
+  background: black;
+  color: red;
+  border: 2px solid red;
+}
+
+.btn-secondary:hover {
+  background: red;
+  color: black;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: aqua;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.btn-link:hover {
+  color: white;
+}
+
+
+input, textarea, select {
+  font-family: "VT323", monospace;
+  font-size: 2rem;
+  padding: 7px 12px;
+  border: 1px dotted rgb(200, 200, 200, 0.2);
+  background: black;
+  color: white;
+  outline: none;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: aqua;
+}
+
+input:disabled, textarea:disabled, select:disabled {
+  background: rgb(6, 0, 19);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+::placeholder {
+  font-size: 2rem;
+  background-color: black;
+  padding: 5px 5px;
+  font-family: "VT323", monospace;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: aqua;
+  font-size: 1.7rem;
+}
+
+
+.window {
+  border: 3px dotted rgb(8, 0, 60);
+  background: rgb(6, 0, 19);
+  box-shadow: none;
+}
+
+.window-title {
+  background: black;
+  color: white;
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: 2.5rem;
+  border-bottom: 2px dotted rgb(8, 0, 60);
+}
+
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  padding: 20px;
+}
+
+.auth-box {
+  background: rgb(6, 0, 19);
+  border: 3px dotted rgb(8, 0, 60);
+  padding: 30px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: none;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-title {
+  font-size: 4rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.auth-subtitle {
+  font-size: 1.5rem;
+  color: aqua;
+}
+
+.auth-form {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 7px 12px;
+}
+
+.auth-footer {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 2px dotted rgb(8, 0, 60);
+}
+
+.link {
+  color: aqua;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.link:hover {
+  color: white;
+}
+
+
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: rgb(6, 0, 19);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px dotted rgb(8, 0, 60);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+  color: white;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar-right .btn-link {
+  color: aqua;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-name {
+  font-size: 1.7rem;
+  color: aqua;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.welcome-section h2 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.subtitle {
+  color: aqua;
+  font-size: 1.7rem;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.dashboard-card {
+  background: rgb(6, 0, 19);
+  border: 3px dotted rgb(8, 0, 60);
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  border-color: aqua;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.dashboard-card:active {
+  border-color: aqua;
+}
+
+.card-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.dashboard-card h3 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.dashboard-card p {
+  color: aqua;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgb(6, 0, 19);
+  border: 3px dotted rgb(8, 0, 60);
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+
+.tutorial-modal {
+  text-align: center;
+}
+
+.tutorial-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+}
+
+.tutorial-title {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.tutorial-text {
+  font-size: 1.7rem;
+  margin-bottom: 25px;
+  line-height: 1.6;
+  color: aqua;
+}
+
+.tutorial-progress {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.progress-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: black;
+  border: 2px solid rgb(8, 0, 60);
+}
+
+.progress-dot.active {
+  background: aqua;
+  border-color: aqua;
+  box-shadow: 0 0 10px aqua;
+}
+
+.progress-dot.completed {
+  background: rgb(4, 255, 0);
+  border-color: rgb(4, 255, 0);
+  box-shadow: 0 0 10px rgb(4, 255, 0);
+}
+
+.tutorial-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.error-message {
+  background: rgb(20, 0, 0);
+  border: 2px solid red;
+  color: red;
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.success-message {
+  background: rgb(0, 20, 0);
+  border: 2px solid rgb(4, 255, 0);
+  color: rgb(4, 255, 0);
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  background: black;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px dotted aqua;
+  border-top-color: rgb(4, 255, 0);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+@media (max-width: 768px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .topbar {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .user-menu {
+    flex-direction: column;
+  }
+  
+  .auth-title {
+    font-size: 3rem;
+  }
+  
+  input, textarea, select {
+    font-size: 1.5rem;
+  }
+  
+  button, .btn {
+    font-size: 1.5rem;
+  }
+}
+*/
+
+
+
+
+
+
+/*FaceSynth.exe - Y2K Windows 2000s Aesthetic */
 
 :root {
   --primary-blue: #0066cc;
@@ -28,7 +523,7 @@ body {
   line-height: 1.4;
 }
 
-/* Buttons */
+
 button, .btn {
   font-family: 'Tahoma', sans-serif;
   font-size: 11px;
@@ -74,7 +569,7 @@ button:active, .btn:active {
   padding: 0;
 }
 
-/* Inputs */
+
 input, textarea, select {
   font-family: 'Tahoma', sans-serif;
   font-size: 11px;
@@ -100,7 +595,6 @@ label {
   font-weight: bold;
 }
 
-/* Window/Panel styles */
 .window {
   border: 2px solid;
   border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
@@ -116,7 +610,7 @@ label {
   font-size: 11px;
 }
 
-/* Auth Pages */
+
 .auth-container {
   min-height: 100vh;
   display: flex;
@@ -182,7 +676,7 @@ label {
   color: var(--primary-hover);
 }
 
-/* Dashboard */
+
 .dashboard-container {
   min-height: 100vh;
   display: flex;
@@ -294,7 +788,7 @@ label {
   margin-bottom: 15px;
 }
 
-/* Modal */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -318,7 +812,7 @@ label {
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
 }
 
-/* Tutorial Modal */
+
 .tutorial-modal {
   text-align: center;
 }
@@ -371,7 +865,7 @@ label {
   justify-content: center;
 }
 
-/* Messages */
+
 .error-message {
   background: #ffcccc;
   border: 2px solid var(--error-red);
@@ -388,7 +882,7 @@ label {
   font-size: 11px;
 }
 
-/* Loading */
+
 .loading-screen {
   min-height: 100vh;
   display: flex;
@@ -411,7 +905,7 @@ label {
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .dashboard-cards {
     grid-template-columns: 1fr;
@@ -426,3 +920,5 @@ label {
     flex-direction: column;
   }
 }
+
+/**/
