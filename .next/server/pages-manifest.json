@@ -1,8 +1,0 @@
-{
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/_app": "pages/_app.js",
-  "/": "pages/index.js",
-  "/editor/[meshId]": "pages/editor/[meshId].js",
-  "/api/user/me": "pages/api/user/me.js"
-}
